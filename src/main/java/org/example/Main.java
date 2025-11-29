@@ -1,7 +1,13 @@
 package org.example;
 
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -9,7 +15,7 @@ public class Main {
     public static void main(String[] args) {
         CommandLineParser parser = new DefaultParser();
 
-// create the Options
+      // create the Option
         Options options = new Options();
         options.addOption("a", "all", false, "do not hide entries starting with .");
         options.addOption("A", "almost-all", false, "do not list implied . and ..");

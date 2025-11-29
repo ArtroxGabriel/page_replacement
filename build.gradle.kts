@@ -1,5 +1,7 @@
 plugins {
     id("application")
+
+    id("io.freefair.lombok") version "9.1.0"
 }
 
 group = "org.example"

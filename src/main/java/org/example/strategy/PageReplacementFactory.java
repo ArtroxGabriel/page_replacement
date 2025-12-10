@@ -10,7 +10,6 @@ public class PageReplacementFactory {
   private static final Map<String, Supplier<PageReplacementStrategy>> strategies = new HashMap<>();
 
   static {
-    // Registrar algoritmos e seus construtores
     register("FIFO", FIFOStrategy::new);
     // register("LRU", LRUStrategy::new);
     // register("OPTIMAL", OptimalStrategy::new);

@@ -1,29 +1,52 @@
 package org.example.strategy;
 
 import org.example.strategy.algorithms.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 public class PageReplacementFactory {
+
+  private static final Map<String, Supplier<PageReplacementStrategy>> strategies = new HashMap<>();
+
+  static {
+    // Registrar algoritmos e seus construtores
+    register("FIFO", FIFOStrategy::new);
+    // register("LRU", LRUStrategy::new);
+    // register("OPTIMAL", OptimalStrategy::new);
+    // register("OPT", OptimalStrategy::new); // Alias
+    // register("SECOND_CHANCE", SecondChanceStrategy::new);
+    // register("SC", SecondChanceStrategy::new); // Alias
+    // register("CLOCK", ClockStrategy::new);
+    // register("NRU", NRUStrategy::new);
+    // register("LFU", LFUStrategy::new);
+    // register("MFU", MFUStrategy::new);
+  }
+
+  public static void register(String name, Supplier<PageReplacementStrategy> strategySupplier) {
+    if (name == null || name.isBlank()) {
+      throw new IllegalArgumentException("Algorithm name cannot be null or empty");
+    }
+    if (strategySupplier == null) {
+      throw new IllegalArgumentException("Strategy supplier cannot be null");
+    }
+    strategies.put(name.toUpperCase().trim(), strategySupplier);
+  }
 
   public static PageReplacementStrategy createStrategy(String algorithmName) {
     if (algorithmName == null || algorithmName.isBlank()) {
       throw new IllegalArgumentException("Algorithm name cannot be null or empty");
     }
 
-    return switch (algorithmName.toUpperCase().trim()) {
-      case "FIFO" -> new FIFOStrategy();
-//      case "LRU" -> new LRUStrategy();
-//      case "OPTIMAL", "OPT" -> new OptimalStrategy();
-//      case "SECOND_CHANCE", "SC" -> new SecondChanceStrategy();
-//      case "CLOCK" -> new ClockStrategy();
-//      case "NRU" -> new NRUStrategy();
-//      case "LFU" -> new LFUStrategy();
-//      case "MFU" -> new MFUStrategy();
-      default -> throw new IllegalArgumentException(
-          String.format(
-              "Unknown algorithm: '%s'. Supported algorithms: FIFO, LRU, OPTIMAL, SECOND_CHANCE, CLOCK, NRU, LFU, MFU",
-              algorithmName
-          )
+    String normalizedName = algorithmName.toUpperCase().trim();
+    Supplier<PageReplacementStrategy> strategySupplier = strategies.get(normalizedName);
+
+    if (strategySupplier == null) {
+      throw new IllegalArgumentException(
+          String.format("Unknown algorithm: '%s'", algorithmName)
       );
-    };
+    }
+
+    return strategySupplier.get();
   }
 }

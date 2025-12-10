@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.example.io.TraceReader;
+import org.example.strategy.PageReplacementFactory;
+import org.example.strategy.PageReplacementStrategy;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -42,11 +44,7 @@ public class Pager implements Callable<Integer> {
   )
   private boolean verbose;
 
-  private final TraceReader traceReader;
-
-  public Pager() {
-    this.traceReader = new TraceReader();
-  }
+  private final TraceReader traceReader = new TraceReader();
 
   @Override
   public Integer call() {
@@ -63,17 +61,25 @@ public class Pager implements Callable<Integer> {
       return 1;
     }
 
+    PageReplacementStrategy strategy;
+    try {
+      strategy = PageReplacementFactory.createStrategy(algorithm);
+    } catch (IllegalArgumentException e) {
+      System.err.println("Error: " + e.getMessage());
+      return 1;
+    }
+
     if (verbose) {
       System.out.println("=== Configuration ===");
-      System.out.println("Algorithm: " + algorithm.toUpperCase());
+      System.out.println("Algorithm: " + strategy.getAlgorithmName());
       System.out.println("Frames: " + frames);
       System.out.println("File: src/main/resources/" + traceFile);
       System.out.println("References loaded: " + pageReferences.size());
       System.out.println();
     }
 
-    // TODO: Execute the selected algorithm with the provided parameters
-    System.out.println("Algorithm: " + algorithm.toUpperCase());
+    // TODO: Executar simulação com a estratégia
+    System.out.println("Algorithm: " + strategy.getAlgorithmName());
     System.out.println("Frames: " + frames);
     System.out.println("References: " + pageReferences.size());
 

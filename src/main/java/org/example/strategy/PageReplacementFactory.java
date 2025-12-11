@@ -41,9 +41,7 @@ public class PageReplacementFactory {
     Supplier<PageReplacementStrategy> strategySupplier = strategies.get(normalizedName);
 
     if (strategySupplier == null) {
-      throw new IllegalArgumentException(
-          String.format("Unknown algorithm: '%s'", algorithmName)
-      );
+      throw new IllegalArgumentException(String.format("Unknown algorithm: '%s'", algorithmName));
     }
 
     return strategySupplier.get();

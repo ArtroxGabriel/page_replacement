@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.example.io.TraceReader;
-import org.example.strategy.PageReplacementFactory;
-import org.example.strategy.PageReplacementStrategy;
+import org.example.simulator.MemorySimulator;
+import org.example.simulator.SimulationResult;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -61,27 +61,21 @@ public class Pager implements Callable<Integer> {
       return 1;
     }
 
-    PageReplacementStrategy strategy;
-    try {
-      strategy = PageReplacementFactory.createStrategy(algorithm);
-    } catch (IllegalArgumentException e) {
-      System.err.println("Error: " + e.getMessage());
-      return 1;
-    }
+    // Executar simulação
+    MemorySimulator simulator = new MemorySimulator(algorithm, frames, verbose);
+    SimulationResult result = simulator.simulate(pageReferences);
 
     if (verbose) {
       System.out.println("=== Configuration ===");
-      System.out.println("Algorithm: " + strategy.getAlgorithmName());
+      System.out.println("Algorithm: " + algorithm);
       System.out.println("Frames: " + frames);
       System.out.println("File: src/main/resources/" + traceFile);
       System.out.println("References loaded: " + pageReferences.size());
       System.out.println();
     }
 
-    // TODO: Executar simulação com a estratégia
-    System.out.println("Algorithm: " + strategy.getAlgorithmName());
-    System.out.println("Frames: " + frames);
-    System.out.println("References: " + pageReferences.size());
+    // Exibir resultados
+    result.printSummary(algorithm);
 
     return 0;
   }

@@ -30,7 +30,16 @@ public class OptimalStrategy implements PageReplacementStrategy {
     }
 
     // case 2: no empty frame, apply the Optimal logic
-    var victimPage = getVictimPage(frames, page, pageReferences, currentTime);
+    // compute the current index within the provided reference list. If not found, assume 0
+    int currentIndexInRefs = 0;
+    if (pageReferences != null) {
+      int idx = pageReferences.indexOf(page.getId());
+      if (idx != -1) {
+        currentIndexInRefs = idx;
+      }
+    }
+
+    var victimPage = getVictimPage(frames, page, pageReferences, currentIndexInRefs);
     log.info("page fault - evicting page {} from frame {}", victimPage.getPageId(),
         victimPage.getIndex());
     var evictedPageId = victimPage.getPageId();

@@ -34,7 +34,7 @@ public class LRUStrategy implements PageReplacementStrategy {
     }
 
     // case 2: no empty frame, apply the LRU logic, get the frame with the oldest load time
-    var victimPage = getVictimPage(frames, page, pageReferences, currentTime);
+    var victimPage = getVictimPage(frames, page, pageReferences, -1);
     log.info("page fault - evicting page {} from frame {}", victimPage.getPageId(),
         victimPage.getIndex());
 

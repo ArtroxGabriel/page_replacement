@@ -85,7 +85,7 @@ public class MemorySimulator {
       System.out.println("  → FAULT");
     }
 
-    // se houver espaço livre, carregar a página sem substituição
+    // if it has empty frame, load the page there
     if (this.frames.stream().anyMatch(PageFrame::isEmpty)) {
       ReplacementResult result = strategy.referencePage(page, frames, framesCapacity,
           pageReferences, true);

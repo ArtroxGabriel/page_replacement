@@ -30,12 +30,7 @@ public class LRUStrategy implements PageReplacementStrategy {
     // case 1: check for empty frame
     int emptyFrameIndex = findEmptyFrame(frames);
     if (emptyFrameIndex != -1) {
-      // load page into empty frame
-      var emptyFrame = frames.get(emptyFrameIndex);
-      emptyFrame.accessPage(page, currentTime);
-
-      log.info("page fault - loaded page {} into empty frame {}", page.getId(), emptyFrameIndex);
-      return new ReplacementResult(true, emptyFrameIndex, -1);
+      return emptyFrameResult(emptyFrameIndex, page, currentTime, frames);
     }
 
     // case 2: no empty frame, apply the LRU logic, get the frame with the oldest load time
@@ -50,13 +45,6 @@ public class LRUStrategy implements PageReplacementStrategy {
     victimPage.accessPage(page, currentTime);
 
     return new ReplacementResult(true, victimPageIndex, evictedPageId);
-  }
-
-  @Override
-  public int getVictimFrameIndex(List<PageFrame> frames, Page page,
-      List<Integer> pageReferences, int currentIndex) {
-    PageFrame victim = getVictimPage(frames, page, pageReferences, currentIndex);
-    return victim != null ? victim.getIndex() : -1;
   }
 
   @Override

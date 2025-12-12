@@ -1,10 +1,11 @@
 package strategy;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.example.entities.Page;
 import org.example.entities.PageFrame;
 import org.example.entities.ReplacementResult;
@@ -24,7 +25,7 @@ public class LRUStrategyTest {
 
     List<PageFrame> frames = Arrays.asList(frame0, frame1);
 
-    ReplacementResult res = lru.referencePage(page, frames, 10, false);
+    ReplacementResult res = lru.referencePage(page, frames, 10, List.of(1), false);
 
     assertFalse(res.pageFault(), "Should be a page hit (no fault)");
     assertEquals(0, res.frameIndex(), "Hit should be in frame 0");
@@ -44,7 +45,7 @@ public class LRUStrategyTest {
 
     List<PageFrame> frames = Arrays.asList(frame0, frame1);
 
-    ReplacementResult res = lru.referencePage(page, frames, 7, true);
+    ReplacementResult res = lru.referencePage(page, frames, 7, List.of(1), true);
 
     assertTrue(res.pageFault(), "Should be a page fault when hasFault=true");
     assertEquals(0, res.frameIndex(), "First empty frame (0) should be used");
@@ -69,7 +70,7 @@ public class LRUStrategyTest {
 
     List<PageFrame> frames = Arrays.asList(frame0, frame1);
 
-    ReplacementResult res = lru.referencePage(incoming, frames, 20, true);
+    ReplacementResult res = lru.referencePage(incoming, frames, 20, List.of(1), true);
 
     assertTrue(res.pageFault(), "Should be a page fault");
     assertEquals(0, res.frameIndex(), "Frame 0 (oldest) should be evicted");
@@ -77,7 +78,8 @@ public class LRUStrategyTest {
 
     PageFrame replaced = frames.get(0);
     assertEquals(3, replaced.getPageId(), "Incoming page should now occupy the evicted frame");
-    assertEquals(20, replaced.getLoadTime(), "Load time should be updated to current time after replacement");
+    assertEquals(20, replaced.getLoadTime(),
+        "Load time should be updated to current time after replacement");
   }
 
   @Test

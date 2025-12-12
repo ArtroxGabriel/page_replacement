@@ -12,7 +12,7 @@ public class LRUStrategy implements PageReplacementStrategy {
 
   @Override
   public ReplacementResult referencePage(Page page, List<PageFrame> frames, int currentTime,
-      boolean hasFault) {
+      List<Integer> pageReferences, boolean hasFault) {
     log.info("starting LRU referencePage");
 
     if (!hasFault) {
@@ -39,7 +39,7 @@ public class LRUStrategy implements PageReplacementStrategy {
     }
 
     // case 2: no empty frame, apply the LRU logic, get the frame with the oldest load time
-    var victimPage = getVictimPage(frames, page, currentTime);
+    var victimPage = getVictimPage(frames, page, pageReferences, currentTime);
     log.info("page fault - evicting page {} from frame {}", victimPage.getPageId(),
         victimPage.getIndex());
 
@@ -54,13 +54,13 @@ public class LRUStrategy implements PageReplacementStrategy {
 
   @Override
   public int getVictimFrameIndex(List<PageFrame> frames, Page page,
-      int currentIndex) {
-    PageFrame victim = getVictimPage(frames, page, currentIndex);
+      List<Integer> pageReferences, int currentIndex) {
+    PageFrame victim = getVictimPage(frames, page, pageReferences, currentIndex);
     return victim != null ? victim.getIndex() : -1;
   }
 
   @Override
-  public PageFrame getVictimPage(List<PageFrame> frames, Page page,
+  public PageFrame getVictimPage(List<PageFrame> frames, Page page, List<Integer> _pageReferences,
       int _currentIndex) {
     PageFrame lruFrame = null;
     int minTime = Integer.MAX_VALUE;

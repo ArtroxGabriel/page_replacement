@@ -46,7 +46,7 @@ public class MemorySimulator {
     for (int currentTime = 0; currentTime < pageReferences.size(); currentTime++) {
       int pageId = pageReferences.get(currentTime);
       var page = pages.get(pageId);
-      processPageReference(page, currentTime);
+      processPageReference(page, currentTime, pageReferences);
     }
 
     return new SimulationResult(
@@ -58,7 +58,7 @@ public class MemorySimulator {
     );
   }
 
-  private void processPageReference(Page page, int currentTime) {
+  private void processPageReference(Page page, int currentTime, List<Integer> pageReferences) {
     if (verbose) {
       System.out.printf("Reference #%d: Page %d\n", currentTime + 1, page.getId());
     }
@@ -68,9 +68,9 @@ public class MemorySimulator {
         .anyMatch(frame -> frame.getPageId() == page.getId());
 
     if (pageInMemory) {
-      notifyStrategyPageAccess(page);
+      notifyStrategyPageAccess(page, pageReferences);
     } else {
-      pageFaultHandler(page, currentTime);
+      pageFaultHandler(page, currentTime, pageReferences);
     }
 
     if (verbose) {
@@ -79,7 +79,7 @@ public class MemorySimulator {
     }
   }
 
-  private void pageFaultHandler(Page page, int currentTime) {
+  private void pageFaultHandler(Page page, int currentTime, List<Integer> pageReferences) {
     pageFaults++;
     if (verbose) {
       System.out.println("  → FAULT");
@@ -87,7 +87,8 @@ public class MemorySimulator {
 
     // se houver espaço livre, carregar a página sem substituição
     if (this.frames.stream().anyMatch(PageFrame::isEmpty)) {
-      ReplacementResult result = strategy.referencePage(page, frames, framesCapacity, true);
+      ReplacementResult result = strategy.referencePage(page, frames, framesCapacity,
+          pageReferences, true);
       if (verbose) {
         System.out.printf("  → Loaded into frame %d\n", frames.size() - 1);
       }
@@ -95,7 +96,7 @@ public class MemorySimulator {
     }
 
     // precisa substituir uma página
-    PageFrame victimPage = strategy.getVictimPage(frames, page, currentTime);
+    PageFrame victimPage = strategy.getVictimPage(frames, page, pageReferences, currentTime);
 
     if (victimPage != null) {
       replacements++;
@@ -105,17 +106,17 @@ public class MemorySimulator {
     }
 
     // executar a substituição através da estratégia
-    strategy.referencePage(page, frames, framesCapacity, true);
+    strategy.referencePage(page, frames, framesCapacity, pageReferences, true);
 
   }
 
-  private void notifyStrategyPageAccess(Page page) {
+  private void notifyStrategyPageAccess(Page page, List<Integer> pageReferences) {
     pageHits++;
     if (verbose) {
       System.out.println("  → HIT");
     }
     // notificar a estratégia sobre o acesso (importante para LRU, LFU, etc)
-    strategy.referencePage(page, frames, framesCapacity, false);
+    strategy.referencePage(page, frames, framesCapacity, pageReferences, false);
   }
 
   private void printMemoryState() {

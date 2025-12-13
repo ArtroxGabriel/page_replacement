@@ -36,7 +36,7 @@ public abstract class FrequencyBasedStrategy implements PageReplacementStrategy 
       frame.accessPage(page, currentTime);
       frame.resetFrequency();
       frame.incrementFrequency(); // First access
-      return new ReplacementResult(false, emptyFrameIndex, -1);
+      return emptyFrameResult(emptyFrameIndex, page, frames);
     }
 
     // Case 2: no empty frame, apply frequency-based logic

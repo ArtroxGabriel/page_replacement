@@ -18,56 +18,79 @@ public class SecondChanceStrategy implements PageReplacementStrategy {
   }
 
   @Override
-  public ReplacementResult referencePage(Page page, List<PageFrame> frames, int framesCapacity,
-      List<Integer> referenceString, boolean isFault) {
+  public ReplacementResult referencePage(Page page, List<PageFrame> frames, int currentTime,
+      List<Integer> pageReferences, boolean hasFault) {
+    log.info("starting {} referencePage", getAlgorithmName());
 
-    // If it's a hit (not a fault), just set the reference bit
-    if (!isFault) {
-      for (PageFrame frame : frames) {
-        if (frame.getPageId() == page.getId()) {
-          frame.setReferenceBit(1);
-          return new ReplacementResult(false, frame.getIndex(), -1);
-        }
-      }
+    if (!hasFault) {
+      // Page hit: set reference bit
+      var frameIndex = findPageInFrames(frames, page);
+      var pageFrame = frames.get(frameIndex);
+      pageFrame.setReferenceBit(1);
+
+      log.info("page hit - set reference bit for page {} in frame {}", page.getId(), frameIndex);
+      return new ReplacementResult(false, frameIndex, -1);
     }
 
-    // If there's an empty frame, load there
-    for (PageFrame frame : frames) {
-      if (frame.isEmpty()) {
-        frame.accessPage(page, 0);
-        frame.setReferenceBit(1);
-        return new ReplacementResult(false, frame.getIndex(), -1);
-      }
+    // Page fault: find victim or empty frame
+
+    // Case 1: check for empty frame
+    int emptyFrameIndex = findEmptyFrame(frames);
+    if (emptyFrameIndex != -1) {
+      log.info("page fault - loading page {} into empty frame {}", page.getId(), emptyFrameIndex);
+      var frame = frames.get(emptyFrameIndex);
+      frame.accessPage(page);
+      frame.setReferenceBit(1);
+      return emptyFrameResult(emptyFrameIndex, page, frames);
     }
 
-    // No empty frame, need to replace
-    PageFrame victim = getVictimPage(frames, page, referenceString, 0);
-    int victimId = victim.getPageId();
+    // Case 2: no empty frame, apply clock algorithm
+    log.info("page fault - searching for victim using clock algorithm (pointer at {})", clockPointer);
+    var victimPage = getVictimPage(frames, page, pageReferences, -1);
+    log.info("page fault - evicting page {} from frame {}", victimPage.getPageId(), victimPage.getIndex());
 
-    victim.accessPage(page, 0);
-    victim.setReferenceBit(1);
+    var evictedPageId = victimPage.getPageId();
+    var victimPageIndex = victimPage.getIndex();
 
-    return new ReplacementResult(true, victim.getIndex(), victimId);
+    victimPage.accessPage(page);
+    victimPage.setReferenceBit(1);
+
+    return new ReplacementResult(true, victimPageIndex, evictedPageId);
   }
 
   @Override
-  public PageFrame getVictimPage(List<PageFrame> frames, Page page, List<Integer> referenceString,
-      int currentIndex) {
+  public PageFrame getVictimPage(List<PageFrame> frames, Page page, List<Integer> referenceString, int currentIndex) {
 
-    // rotate until finding a page with R=0
+    // Rotate until finding a page with R=0
     while (true) {
       PageFrame current = frames.get(clockPointer);
+      log.debug("clock at position {}: page {} has R={}", clockPointer, current.getPageId(), current.getReferenceBit());
 
       if (current.getReferenceBit() == 0) {
         // R=0: found victim, advance pointer to next position
         int victimIndex = clockPointer;
         clockPointer = (clockPointer + 1) % frames.size();
+        log.debug("victim found at position {}, advancing clock pointer to {}", victimIndex, clockPointer);
         return frames.get(victimIndex);
       } else {
         // R=1: give second chance, clear bit and advance
+        log.debug("giving second chance to page {} at position {}", current.getPageId(), clockPointer);
         current.setReferenceBit(0);
         clockPointer = (clockPointer + 1) % frames.size();
       }
     }
+  }
+
+  @Override
+  public int findPageInFrames(List<PageFrame> frames, Page page) {
+    log.debug("checking for page {} in frames", page.getId());
+
+    for (int i = 0; i < frames.size(); i++) {
+      if (frames.get(i).getPageId() == page.getId()) {
+        log.debug("page {} found in frame {}", page.getId(), i);
+        return i;
+      }
+    }
+    return -1;
   }
 }

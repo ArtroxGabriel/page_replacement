@@ -1,7 +1,6 @@
 package org.example.strategy;
 
 import java.util.List;
-import lombok.extern.log4j.Log4j2;
 import org.example.entities.Page;
 import org.example.entities.PageFrame;
 import org.example.entities.ReplacementResult;

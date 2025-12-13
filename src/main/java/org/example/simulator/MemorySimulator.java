@@ -63,7 +63,7 @@ public class MemorySimulator {
       System.out.printf("Reference #%d: Page %d\n", currentTime + 1, page.getId());
     }
 
-    // verificar se a página já está na memória (page hit)
+    // Check if the page is already in memory (page hit)
     boolean pageInMemory = frames.stream()
         .anyMatch(frame -> frame.getPageId() == page.getId());
 
@@ -85,22 +85,23 @@ public class MemorySimulator {
       System.out.println("  → FAULT");
     }
 
-    // if it has empty frame, load the page there
+    // If there's an empty frame, load the page there
     if (this.frames.stream().anyMatch(PageFrame::isEmpty)) {
       ReplacementResult result = strategy.referencePage(
           page,
           frames,
           framesCapacity,
           pageReferences,
-          true
+          false
       );
       if (verbose) {
         System.out.printf("  → Loaded into frame %d\n", frames.size() - 1);
       }
+
       return;
     }
 
-    // precisa substituir uma página
+    // Need to replace a page
     PageFrame victimPage = strategy.getVictimPage(frames, page, pageReferences, currentTime);
 
     if (victimPage != null) {
@@ -110,9 +111,8 @@ public class MemorySimulator {
       }
     }
 
-    // executar a substituição através da estratégia
+    // Execute the replacement through the strategy
     strategy.referencePage(page, frames, framesCapacity, pageReferences, true);
-
   }
 
   private void notifyStrategyPageAccess(Page page, List<Integer> pageReferences) {
@@ -120,7 +120,7 @@ public class MemorySimulator {
     if (verbose) {
       System.out.println("  → HIT");
     }
-    // notificar a estratégia sobre o acesso (importante para LRU, LFU, etc)
+    // Notify the strategy about the access (important for LRU, LFU, etc.)
     strategy.referencePage(page, frames, framesCapacity, pageReferences, false);
   }
 

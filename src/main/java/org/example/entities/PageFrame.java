@@ -12,6 +12,7 @@ public class PageFrame {
   private int loadTime;
   private boolean empty;
   private int referenceBit;
+  private int modifyBit;
 
   public PageFrame(int index) {
     this.index = index;

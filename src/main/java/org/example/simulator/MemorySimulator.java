@@ -1,8 +1,10 @@
 package org.example.simulator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import lombok.Getter;
+import org.example.entities.Page;
 import org.example.entities.PageFrame;
 import org.example.entities.ReplacementResult;
 import org.example.strategy.PageReplacementFactory;
@@ -13,6 +15,7 @@ public class MemorySimulator {
 
   private final PageReplacementStrategy strategy;
   private final int framesCapacity;
+  private final HashMap<Integer, Page> pages;
   private final List<PageFrame> frames;
   private final boolean verbose;
 
@@ -25,6 +28,11 @@ public class MemorySimulator {
     this.framesCapacity = framesCapacity;
     this.verbose = verbose;
     this.frames = new ArrayList<>(framesCapacity);
+    for (int i = 0; i < framesCapacity; i++) {
+      frames.add(new PageFrame(i));
+    }
+
+    this.pages = new HashMap<>();
   }
 
   public SimulationResult simulate(List<Integer> pageReferences) {
@@ -33,9 +41,12 @@ public class MemorySimulator {
       System.out.println();
     }
 
-    for (int i = 0; i < pageReferences.size(); i++) {
-      int pageId = pageReferences.get(i);
-      processPageReference(pageId, pageReferences, i);
+    pageReferences.forEach(reference -> pages.putIfAbsent(reference, new Page(reference)));
+
+    for (int currentTime = 0; currentTime < pageReferences.size(); currentTime++) {
+      int pageId = pageReferences.get(currentTime);
+      var page = pages.get(pageId);
+      processPageReference(page, currentTime, pageReferences);
     }
 
     return new SimulationResult(
@@ -47,19 +58,19 @@ public class MemorySimulator {
     );
   }
 
-  private void processPageReference(int pageId, List<Integer> pageReferences, int index) {
+  private void processPageReference(Page page, int currentTime, List<Integer> pageReferences) {
     if (verbose) {
-      System.out.printf("Reference #%d: Page %d\n", index + 1, pageId);
+      System.out.printf("Reference #%d: Page %d\n", currentTime + 1, page.getId());
     }
 
     // verificar se a página já está na memória (page hit)
     boolean pageInMemory = frames.stream()
-        .anyMatch(frame -> frame.getPageId() == pageId);
+        .anyMatch(frame -> frame.getPageId() == page.getId());
 
     if (pageInMemory) {
-      notifyStrategyPageAccess(pageId);
+      notifyStrategyPageAccess(page, pageReferences);
     } else {
-      pageFaultHandler(pageId, pageReferences, index);
+      pageFaultHandler(page, currentTime, pageReferences);
     }
 
     if (verbose) {
@@ -68,41 +79,44 @@ public class MemorySimulator {
     }
   }
 
-  private void pageFaultHandler(int pageId, List<Integer> pageReferences, int index) {
+  private void pageFaultHandler(Page page, int currentTime, List<Integer> pageReferences) {
     pageFaults++;
     if (verbose) {
       System.out.println("  → FAULT");
     }
 
-    // se há espaço disponível, adicionar diretamente
-    if (frames.size() < framesCapacity) {
-      ReplacementResult result = strategy.referencePage(pageId, frames, framesCapacity);
+    // if it has empty frame, load the page there
+    if (this.frames.stream().anyMatch(PageFrame::isEmpty)) {
+      ReplacementResult result = strategy.referencePage(page, frames, framesCapacity,
+          pageReferences, true);
       if (verbose) {
         System.out.printf("  → Loaded into frame %d\n", frames.size() - 1);
       }
-    } else {
-      // precisa substituir uma página
-      PageFrame victimPage = strategy.getVictimPage(frames, pageId, pageReferences, index);
-
-      if (victimPage != null) {
-        replacements++;
-        if (verbose) {
-          System.out.printf("  → Replacing page %d\n", victimPage.getPageId());
-        }
-      }
-
-      // executar a substituição através da estratégia
-      strategy.referencePage(pageId, frames, framesCapacity);
+      return;
     }
+
+    // precisa substituir uma página
+    PageFrame victimPage = strategy.getVictimPage(frames, page, pageReferences, currentTime);
+
+    if (victimPage != null) {
+      replacements++;
+      if (verbose) {
+        System.out.printf("  → Replacing page %d\n", victimPage.getPageId());
+      }
+    }
+
+    // executar a substituição através da estratégia
+    strategy.referencePage(page, frames, framesCapacity, pageReferences, true);
+
   }
 
-  private void notifyStrategyPageAccess(int pageId) {
+  private void notifyStrategyPageAccess(Page page, List<Integer> pageReferences) {
     pageHits++;
     if (verbose) {
       System.out.println("  → HIT");
     }
     // notificar a estratégia sobre o acesso (importante para LRU, LFU, etc)
-    strategy.referencePage(pageId, frames, framesCapacity);
+    strategy.referencePage(page, frames, framesCapacity, pageReferences, false);
   }
 
   private void printMemoryState() {

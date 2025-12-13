@@ -1,18 +1,11 @@
 package org.example.entities;
 
-import lombok.Getter;
-
-@Getter
-public class ReplacementResult {
-  private final boolean pageFault;
-  private final int frameIndex;
-  private final int evictedPageId;
-
-  public ReplacementResult(boolean pageFault, int frameIndex, int evictedPageId) {
-    this.pageFault = pageFault;
-    this.frameIndex = frameIndex;
-    this.evictedPageId = evictedPageId;
-  }
+/**
+ * @param pageFault     indicates if a page fault occurred
+ * @param frameIndex    the index of the frame that was loaded or accessed
+ * @param evictedPageId the ID of the evicted page, or -1 if no eviction occurred
+ */
+public record ReplacementResult(boolean pageFault, int frameIndex, int evictedPageId) {
 
   public boolean hadEviction() {
     return evictedPageId != -1;

@@ -77,7 +77,6 @@ public interface PageReplacementStrategy {
     return new ReplacementResult(true, emptyFrameIndex, -1);
   }
 
-
   /**
    * Determine the index of the victim frame to evict for the given page reference.
    *

@@ -87,8 +87,13 @@ public class MemorySimulator {
 
     // if it has empty frame, load the page there
     if (this.frames.stream().anyMatch(PageFrame::isEmpty)) {
-      ReplacementResult result = strategy.referencePage(page, frames, framesCapacity,
-          pageReferences, true);
+      ReplacementResult result = strategy.referencePage(
+          page,
+          frames,
+          framesCapacity,
+          pageReferences,
+          true
+      );
       if (verbose) {
         System.out.printf("  → Loaded into frame %d\n", frames.size() - 1);
       }

@@ -1,6 +1,7 @@
 package org.example.strategy;
 
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
 import org.example.entities.Page;
 import org.example.entities.PageFrame;
 import org.example.entities.ReplacementResult;
@@ -55,6 +56,23 @@ public interface PageReplacementStrategy {
       List<PageFrame> frames) {
     var emptyFrame = frames.get(emptyFrameIndex);
     emptyFrame.accessPage(page, time);
+    emptyFrame.setReferenceBit(1);
+
+    return new ReplacementResult(true, emptyFrameIndex, -1);
+  }
+
+  /**
+   * Helper to create a {@link ReplacementResult} for loading a page into an empty frame.
+   *
+   * @param emptyFrameIndex the index of the empty frame
+   * @param page            the page to load
+   * @param frames          the list of page frames
+   * @return a {@link ReplacementResult} for loading a page into an empty frame
+   */
+  default ReplacementResult emptyFrameResult(int emptyFrameIndex, Page page, List<PageFrame> frames) {
+    var emptyFrame = frames.get(emptyFrameIndex);
+    emptyFrame.accessPage(page);
+    emptyFrame.setReferenceBit(1);
 
     return new ReplacementResult(true, emptyFrameIndex, -1);
   }
@@ -90,6 +108,12 @@ public interface PageReplacementStrategy {
    * @return the index of the frame containing the page, or -1 if not present
    */
   default int findPageInFrames(List<PageFrame> frames, Page page) {
+    for (var index = 0; index < frames.size(); index++) {
+      if (frames.get(index).isEmpty()) {
+        return index;
+      }
+
+    }
     return -1;
   }
 

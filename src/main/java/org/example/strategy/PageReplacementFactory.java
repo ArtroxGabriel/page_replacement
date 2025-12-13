@@ -18,8 +18,8 @@ public class PageReplacementFactory {
      register("SC", SecondChanceStrategy::new); // Alias
      register("CLOCK", SecondChanceStrategy::new);
      register("NRU", NRUStrategy::new);
-    // register("LFU", LFUStrategy::new);
-    // register("MFU", MFUStrategy::new);
+     register("LFU", LFUStrategy::new);
+     register("MFU", MFUStrategy::new);
   }
 
   public static void register(String name, Supplier<PageReplacementStrategy> strategySupplier) {

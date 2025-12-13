@@ -23,7 +23,6 @@ public interface PageReplacementStrategy {
   ReplacementResult referencePage(Page page, List<PageFrame> frames, int currentTime,
       List<Integer> pageReferences, boolean hasFault);
 
-
   /**
    * Return the actual {@link PageFrame} chosen as victim for eviction.
    *

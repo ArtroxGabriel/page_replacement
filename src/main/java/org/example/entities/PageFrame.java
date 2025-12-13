@@ -13,6 +13,7 @@ public class PageFrame {
   private boolean empty;
   private int referenceBit;
   private int modifyBit;
+  private int frequency;
 
   public PageFrame(int index) {
     this.index = index;
@@ -39,6 +40,20 @@ public class PageFrame {
     this.page = page;
     this.loadTime = time;
     this.empty = false;
+  }
+
+  /**
+   * Increments frequency.
+   */
+  public void incrementFrequency() {
+    this.frequency++;
+  }
+
+  /**
+   * Reset frequency.
+   */
+  public void resetFrequency() {
+    this.frequency = 0;
   }
 
   /**

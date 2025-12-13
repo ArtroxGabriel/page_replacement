@@ -11,13 +11,13 @@ public class PageReplacementFactory {
 
   static {
     register("FIFO", FIFOStrategy::new);
-    // register("LRU", LRUStrategy::new);
-    // register("OPTIMAL", OptimalStrategy::new);
-    // register("OPT", OptimalStrategy::new); // Alias
-    // register("SECOND_CHANCE", SecondChanceStrategy::new);
-    // register("SC", SecondChanceStrategy::new); // Alias
-    // register("CLOCK", ClockStrategy::new);
-    // register("NRU", NRUStrategy::new);
+     register("LRU", LRUStrategy::new);
+     register("OPTIMAL", OptimalStrategy::new);
+     register("OPT", OptimalStrategy::new); // Alias
+     register("SECOND_CHANCE", SecondChanceStrategy::new);
+     register("SC", SecondChanceStrategy::new); // Alias
+     register("CLOCK", SecondChanceStrategy::new);
+     register("NRU", NRUStrategy::new);
     // register("LFU", LFUStrategy::new);
     // register("MFU", MFUStrategy::new);
   }

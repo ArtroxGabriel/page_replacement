@@ -80,18 +80,4 @@ public class LRUStrategy implements PageReplacementStrategy {
     }
     return -1;
   }
-
-  @Override
-  public int findEmptyFrame(List<PageFrame> frames) {
-    log.debug("checking if has empty frame");
-
-    for (var index = 0; index < frames.size(); index++) {
-      if (frames.get(index).isEmpty()) {
-        log.debug("found empty frame at index {}", index);
-        return index;
-      }
-
-    }
-    return -1;
-  }
 }

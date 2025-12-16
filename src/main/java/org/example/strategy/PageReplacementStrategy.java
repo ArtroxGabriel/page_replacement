@@ -121,6 +121,11 @@ public interface PageReplacementStrategy {
    * @return the index of an empty frame, or -1 if none are empty
    */
   default int findEmptyFrame(List<PageFrame> frames) {
+    for (int i = 0; i < frames.size(); i++) {
+      if (frames.get(i).isEmpty()) {
+        return i;
+      }
+    }
     return -1;
   }
 }

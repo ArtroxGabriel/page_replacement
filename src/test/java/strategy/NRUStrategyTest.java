@@ -26,7 +26,7 @@ public class NRUStrategyTest {
   void testWithThreeFrames() {
     List<PageFrame> frames = createFrames(3);
     int pageFaults = simulateReferences(frames);
-    assertTrue(pageFaults >= 10 && pageFaults <= 17,
+    assertTrue(pageFaults >= 10 && pageFaults <= 16,
         "NRU with 3 frames should produce between 9-15 page faults (varies due to randomness)");
   }
 

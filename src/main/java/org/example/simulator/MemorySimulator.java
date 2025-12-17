@@ -15,7 +15,7 @@ public class MemorySimulator {
 
   private final PageReplacementStrategy strategy;
   private final int framesCapacity;
-  private final HashMap<Integer, Page> pages;
+  private final HashMap pages;
   private final List<PageFrame> frames;
   private final boolean verbose;
 
@@ -54,7 +54,8 @@ public class MemorySimulator {
         pageFaults,
         pageHits,
         replacements,
-        framesCapacity
+        framesCapacity,
+        frames
     );
   }
 
@@ -89,20 +90,20 @@ public class MemorySimulator {
     if (this.frames.stream().anyMatch(PageFrame::isEmpty)) {
       ReplacementResult result = strategy.referencePage(
           page,
-          frames,
-          framesCapacity,
+          (List) frames,
+          currentTime,
           pageReferences,
           false
       );
       if (verbose) {
-        System.out.printf("  → Loaded into frame %d\n", frames.size() - 1);
+        System.out.printf("  → Loaded into frame %d\n", result.frameIndex());
       }
 
       return;
     }
 
     // Need to replace a page
-    PageFrame victimPage = strategy.getVictimPage(frames, page, pageReferences, currentTime);
+    PageFrame victimPage = strategy.getVictimPage((List)frames, page, pageReferences, currentTime);
 
     if (victimPage != null) {
       replacements++;
@@ -112,16 +113,16 @@ public class MemorySimulator {
     }
 
     // Execute the replacement through the strategy
-    strategy.referencePage(page, frames, framesCapacity, pageReferences, true);
+    strategy.referencePage(page, (List) frames, framesCapacity, pageReferences, true);
   }
 
-  private void notifyStrategyPageAccess(Page page, List<Integer> pageReferences) {
+  private void notifyStrategyPageAccess(Page page, List pageReferences) {
     pageHits++;
     if (verbose) {
       System.out.println("  → HIT");
     }
     // Notify the strategy about the access (important for LRU, LFU, etc.)
-    strategy.referencePage(page, frames, framesCapacity, pageReferences, false);
+    strategy.referencePage(page, (List) frames, -1, pageReferences, false);
   }
 
   private void printMemoryState() {

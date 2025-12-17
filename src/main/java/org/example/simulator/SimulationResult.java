@@ -10,14 +10,16 @@ public class SimulationResult {
   private final int pageHits;
   private final int replacements;
   private final int framesCapacity;
+  private final List<PageFrame> finalFrames;
 
   public SimulationResult(int totalReferences, int pageFaults, int pageHits,
-      int replacements, int framesCapacity) {
+      int replacements, int framesCapacity, List<PageFrame> finalFrames) {
     this.totalReferences = totalReferences;
     this.pageFaults = pageFaults;
     this.pageHits = pageHits;
     this.replacements = replacements;
     this.framesCapacity = framesCapacity;
+    this.finalFrames = finalFrames;
   }
 
   public double getPageFaultRate() {
@@ -26,17 +28,5 @@ public class SimulationResult {
 
   public double getPageHitRate() {
     return totalReferences > 0 ? (double) pageHits / totalReferences * 100 : 0;
-  }
-
-  public void printSummary(String algorithmName) {
-    System.out.println("=== Simulation Results ===");
-    System.out.println("Algorithm: " + algorithmName);
-    System.out.println("Frames: " + framesCapacity);
-    System.out.println("Total References: " + totalReferences);
-    System.out.println("Page Faults: " + pageFaults);
-    System.out.println("Page Hits: " + pageHits);
-    System.out.println("Replacements: " + replacements);
-    System.out.printf("Page Fault Rate: %.2f%%\n", getPageFaultRate());
-    System.out.printf("Page Hit Rate: %.2f%%\n", getPageHitRate());
   }
 }

@@ -12,7 +12,7 @@ import org.example.strategy.PageReplacementStrategy;
 public class NRUStrategy implements PageReplacementStrategy {
 
   private int referenceCount = 0;
-  private static final int RESET_INTERVAL = 10; // Reset R bit every 10 references
+  private static final int RESET_INTERVAL = 5; // Reset R bit every 5 references
 
   @Override
   public String getAlgorithmName() {

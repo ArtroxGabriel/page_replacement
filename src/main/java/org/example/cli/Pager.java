@@ -61,9 +61,13 @@ public class Pager implements Callable<Integer> {
       return 1;
     }
 
-    // Executar simulação
-    MemorySimulator simulator = new MemorySimulator(algorithm, frames, verbose);
-    SimulationResult result = simulator.simulate(pageReferences);
+    List<Integer> pageReferences;
+    try {
+      pageReferences = traceReader.readTrace(traceFile);
+    } catch (IOException | IllegalArgumentException e) {
+      System.err.println("Error: " + e.getMessage());
+      return 1;
+    }
 
     if (verbose) {
       System.out.println("=== Configuration ===");
@@ -74,8 +78,13 @@ public class Pager implements Callable<Integer> {
       System.out.println();
     }
 
+    // Executar simulação
+    MemorySimulator simulator = new MemorySimulator(algorithm, frames, verbose);
+    SimulationResult result = simulator.simulate(pageReferences);
+
     // Exibir resultados
-    result.printSummary(algorithm);
+    OutputReporter reporter = new OutputReporter();
+    reporter.printReport(algorithm, result);
 
     return 0;
   }

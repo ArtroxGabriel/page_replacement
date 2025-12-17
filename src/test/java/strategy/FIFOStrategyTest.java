@@ -40,14 +40,36 @@ public class FIFOStrategyTest {
 
   private int simulateReferences(List<PageFrame> frames) {
     int pageFaults = 0;
+
     for (int i = 0; i < REFERENCE_STRING.size(); i++) {
       Page page = new Page(REFERENCE_STRING.get(i));
       boolean hasFault = findPageInFrames(frames, page) == -1;
       ReplacementResult result = fifo.referencePage(page, frames, i, REFERENCE_STRING, hasFault);
+
       if (result.pageFault()) {
         pageFaults++;
+        System.out.println("Step " + i + " - Page Fault! Total: " + pageFaults +
+            " | Page: " + page.getId() +
+            " | Evicted: " + (result.evictedPageId() != -1 ? result.evictedPageId() : "none"));
+      } else {
+        System.out.println("Step " + i + " - Page Hit | Page: " + page.getId());
       }
+
+      System.out.print("  Frames: [");
+      for (int j = 0; j < frames.size(); j++) {
+        PageFrame frame = frames.get(j);
+        if (!frame.isEmpty()) {
+          System.out.print("P" + frame.getPageId());
+        } else {
+          System.out.print("empty");
+        }
+        if (j < frames.size() - 1) System.out.print(", ");
+      }
+      System.out.println("]");
     }
+
+    System.out.println("\nFinal Page Faults: " + pageFaults);
+
     return pageFaults;
   }
 

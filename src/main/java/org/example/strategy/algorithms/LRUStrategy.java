@@ -16,8 +16,12 @@ public class LRUStrategy implements PageReplacementStrategy {
     log.info("starting LRU referencePage");
 
     if (!hasFault) {
-      // Page hit: update last access time
       var frameIndex = findPageInFrames(frames, page);
+      if (frameIndex == -1) {
+        log.error("Inconsistent state: page not found in frames during page hit");
+        throw new IllegalStateException(
+            "Page not found in frames during page hit for page " + page.getId());
+      }
       var pageFrame = frames.get(frameIndex);
       pageFrame.accessPage(page, currentTime); // update load time to current time
 

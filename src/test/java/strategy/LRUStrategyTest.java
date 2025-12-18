@@ -95,4 +95,47 @@ public class LRUStrategyTest {
     int idx = lru.findPageInFrames(frames, missing);
     assertEquals(-1, idx, "Page not present should return -1");
   }
+
+  @Test
+  void testClassicReferenceStringSequence() {
+    LRUStrategy lru = new LRUStrategy();
+
+    List<PageFrame> frames = Arrays.asList(
+        new PageFrame(0),
+        new PageFrame(1),
+        new PageFrame(2)
+    );
+
+    int[] pages = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1};
+
+    int faults = 0;
+    int currentTime = 0;
+
+    for (int pageId : pages) {
+      currentTime++;
+      Page page = new Page(pageId);
+
+      boolean isInMemory = false;
+      for (PageFrame f : frames) {
+        if (!f.isEmpty() && f.getPageId() == pageId) {
+          isInMemory = true;
+          break;
+        }
+      }
+
+      ReplacementResult res = lru.referencePage(page, frames, currentTime, List.of(1), !isInMemory);
+
+      if (res.pageFault()) {
+        faults++;
+
+        PageFrame targetFrame = frames.get(res.frameIndex());
+        targetFrame.accessPage(page, currentTime);
+      } else {
+        PageFrame targetFrame = frames.get(res.frameIndex());
+        targetFrame.setLoadTime(currentTime);
+      }
+    }
+
+    assertEquals(12, faults, "The specific sequence should result in 12 page faults");
+  }
 }
